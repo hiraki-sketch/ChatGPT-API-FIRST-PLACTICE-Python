@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Q&A Chat (OpenAI)</title>
+  <style>
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto;max-width:860px;margin:24px auto;padding:0 12px}
+    h1{font-size:20px;margin:0 0 12px}
+    #log{border:1px solid #dddddd;border-radius:10px;padding:12px;height:60vh;overflow:auto;background:#e6eaec}
+    .msg{margin:10px 0;white-space:pre-wrap}
+    .u{font-weight:600}
+    .a{background:#333;border:1px solid #63dc3d;padding:8px;border-radius:8px}
+    form{display:flex;gap:8px;margin-top:12px}
+    input,button{font-size:16px}
+    input{flex:1;padding:10px;border:1px solid #ccc;border-radius:8px}
+    button{padding:10px 16px;border:1px solid #333;border-radius:8px;background:#333;color:#fff;cursor:pointer}
+    button:disabled{opacity:.6;cursor:not-allowed}
+  </style>
+</head>
+<body>
+  <h1>💬 AIChat 質問箱😎✈️🚗🚘😁🛹🚔🚘</h1>
+  <div id="log"></div>
+
+  <form id="f">
+    <input id="q" placeholder="練習用ですなんかテキトーに質問を入力して下さい。 Enter / 送信" autocomplete="off" />
+    <button id="send" type="submit">🤖送信</button>
+  </form>
+
+  <script>
+    const log = document.getElementById("log");
+    const form = document.getElementById("f");
+    const q = document.getElementById("q");
+    const btn = document.getElementById("send");
+
+    function add(role, text) {
+      const div = document.createElement("div");
+      div.className = "msg " + (role === "user" ? "u" : "a");
+      div.textContent = (role === "user" ? "あなた> " : "AI> ") + text;
+      log.appendChild(div);
+      log.scrollTop = log.scrollHeight;
+    }
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const text = q.value.trim();
+      if (!text) return;
+      add("user", text);
+      q.value = ""; btn.disabled = true;
+
+      try {
+        const res = await fetch("/chat", {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({message: text})
+        });
+        const data = await res.json();
+        if (data.reply) add("assistant", data.reply);
+        else add("assistant", "エラー: " + (data.error || "unknown"));
+      } catch (err) {
+        add("assistant", "通信エラー: " + err);
+      } finally {
+        btn.disabled = false;
+        q.focus();
+      }
+    });
+  </script>
+</body>
+</html>

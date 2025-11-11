@@ -1,0 +1,16 @@
+# Python venv / build
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+
+# Secrets / env
+.env
+.env.*
+
+# VS Code
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
